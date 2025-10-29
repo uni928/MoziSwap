@@ -82,7 +82,7 @@
           <textarea id="inputText" class="w-full rounded-2xl bg-white/5 border border-white/10 p-4 min-h-[8rem] focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="ここにテキストを入力"></textarea>
           <div class="flex items-center justify-between text-xs opacity-80">
             <span id="charCount">0 文字</span>
-            <span>ヒント：長文はQRが細かくなるため、リンク共有が扱いやすいです。</span>
+            <span>ヒント：QRを作るの後、フルスクリーンQRを選択します。長文はQRが細かくなるため、リンク共有が扱いやすいです。</span>
           </div>
 
           <div class="grid grid-cols-2 gap-3 mt-2">
@@ -226,58 +226,13 @@
     function updateLink(){ linkPreview.textContent = buildLink(); }
 
     // --- QR生成 ---
-    function clearQR(target){ target.innerHTML = ''; }function makeQR(target, text) {
-  clearQR(target);
-  const size = target.clientWidth || 300;
-  const margin = 20; // 白余白の幅（px）
+    function clearQR(target){ target.innerHTML = ''; }
 
-  // 一時的に非表示のdivにQR生成
-  const tempDiv = document.createElement('div');
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.left = '-9999px';
-  document.body.appendChild(tempDiv);
-
-  const qrcode = new QRCode(tempDiv, {
-    text,
-    width: size,
-    height: size,
-    colorDark: "#000000",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.M
-  });
-
-  // QRコード生成が完了するまで少し待つ
-  setTimeout(() => {
-    const qrImg = tempDiv.querySelector('img') || tempDiv.querySelector('canvas');
-    if (!qrImg) {
-      target.innerHTML = '<p class="text-center text-slate-400">QR生成に失敗しました</p>';
-      document.body.removeChild(tempDiv);
-      return;
-    }
-
-    // キャンバスで白余白付きの画像を生成
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const newSize = size + margin * 2;
-    canvas.width = newSize;
-    canvas.height = newSize;
-
-    // 背景白塗り
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, newSize, newSize);
-
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, margin, margin, size, size);
-      const finalImg = new Image();
-      finalImg.src = canvas.toDataURL("image/png");
-      target.innerHTML = "";
-      target.appendChild(finalImg);
-      document.body.removeChild(tempDiv);
-    };
-    img.src = qrImg.src || qrImg.toDataURL?.();
-  }, 200); // 生成完了を待つために少し遅延
-}
+ function makeQR(target, text){
+   clearQR(target);
+   const size = target.clientWidth || 300;
+   return new QRCode(target, { text, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+ }
 
     btnMakeQR.addEventListener('click', ()=>{
       const link = buildLink();
